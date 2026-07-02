@@ -1,0 +1,76 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flamapy-dnnf"
+version = "2.6.0.dev6"
+description = "flamapy-dnnf is a plugin to flamapy providing exact analysis of feature models via d-DNNF knowledge compilation with the d4 compiler"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+authors = [{ name = "Flamapy", email = "flamapy@us.es" }]
+requires-python = ">=3.11"
+dependencies = [
+    "flamapy-fw~=2.6.0.dev5",
+    "flamapy-fm~=2.6.0.dev5",
+    "flamapy-sat~=2.6.0.dev5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-mock",
+    "prospector",
+    "mypy",
+    "coverage",
+]
+
+[project.urls]
+Homepage = "https://github.com/flamapy/dnnf_metamodel"
+
+[tool.setuptools.packages.find]
+include = ["flamapy.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "C", "PL", "RUF"]
+ignore = [
+    "RUF012",
+    "RUF002",
+    "RUF001",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ALL"]
+"build/*" = ["ALL"]
+"resources/*" = ["ALL"]
+".mypy_cache/*" = ["ALL"]
+"venv/*" = ["ALL"]
+".venv/*" = ["ALL"]
+"env/*" = ["ALL"]
+"flamapy_dnnf.egg-info/*" = ["ALL"]
+"__pycache__/*" = ["ALL"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 100
+
+[tool.mypy]
+scripts_are_modules = true
+show_traceback = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+warn_no_return = true
+strict_optional = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+show_error_codes = true
+ignore_missing_imports = true
+warn_unreachable = true

@@ -3,16 +3,16 @@ import subprocess
 import tempfile
 
 from flamapy.core.transformations import ModelToModel
-from flamapy.metamodels.fm_metamodel.models import FeatureModel
-from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat
+from flamapy.metamodels.fm_metamodel.models import FeatureModel, ClauseSet
 from flamapy.metamodels.dnnf_metamodel.models import DDNNFModel, locate_d4
 
 
 class FmToDDNNF(ModelToModel):
     """Transform a feature model into a d-DNNF-backed model.
 
-    Builds the CNF (reusing the SAT metamodel), writes it as DIMACS, and — when ``compile`` is
-    set — invokes d4 to dump the compiled d-DNNF artifact. Exact queries run d4 on the DIMACS.
+    Builds the CNF via the feature-model ``ClauseSet`` (no SAT-solver dependency), writes it as
+    DIMACS, and — when ``compile`` is set — invokes d4 to dump the compiled d-DNNF artifact.
+    Exact queries run d4 on the DIMACS.
     """
 
     @staticmethod
@@ -35,12 +35,8 @@ class FmToDDNNF(ModelToModel):
         self.destination_model = DDNNFModel()
 
     def transform(self) -> DDNNFModel:
-        if self.cnf_method == 'distributive':
-            sat_model = FmToPysat(self.source_model).transform()
-        else:
-            sat_model = FmToPysat(self.source_model, cnf_method=self.cnf_method).transform()
-
-        clauses = [list(clause) for clause in sat_model.get_all_clauses().clauses]
+        clause_set = ClauseSet.from_feature_model(self.source_model, cnf_method=self.cnf_method)
+        clauses = [list(clause) for clause in clause_set.clauses]
         var_count = max((abs(literal) for clause in clauses for literal in clause), default=1)
 
         dimacs_fd, dimacs_path = tempfile.mkstemp(suffix='.cnf', prefix='flamapy_dnnf_')
@@ -52,8 +48,8 @@ class FmToDDNNF(ModelToModel):
         model = self.destination_model
         model.dimacs_path = dimacs_path
         model.var_count = var_count
-        model.variables = dict(sat_model.variables)
-        model.features = dict(sat_model.features)
+        model.variables = dict(clause_set.variables)
+        model.features = dict(clause_set.features)
         model.original_model = self.source_model
 
         if self.compile:

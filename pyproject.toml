@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flamapy-dnnf"
-version = "2.6.0.dev10"
+version = "2.6.0.dev11"
 description = "flamapy-dnnf is a plugin to flamapy providing exact analysis of feature models via d-DNNF knowledge compilation with the d4 compiler"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 authors = [{ name = "Flamapy", email = "flamapy@us.es" }]
 requires-python = ">=3.11"
 dependencies = [
-    "flamapy-fw~=2.6.0.dev10",
-    "flamapy-fm~=2.6.0.dev10",
+    "flamapy-fw~=2.6.0.dev11",
+    "flamapy-fm~=2.6.0.dev11",
 ]
 
 [project.optional-dependencies]

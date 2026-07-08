@@ -24,6 +24,9 @@ dev = [
     "coverage",
 ]
 
+[project.entry-points."flamapy.plugins"]
+dnnf = "flamapy.metamodels.dnnf_metamodel"
+
 [project.urls]
 Homepage = "https://github.com/flamapy/dnnf_metamodel"
 

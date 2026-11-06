@@ -26,7 +26,7 @@ class FmToDDNNF(ModelToModel):
     def __init__(
         self,
         source_model: FeatureModel,
-        cnf_method: str = 'distributive',
+        cnf_method: str = 'auto',
         compile: bool = False,
     ) -> None:
         self.source_model = source_model

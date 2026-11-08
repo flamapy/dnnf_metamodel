@@ -13,6 +13,18 @@ jobs:
       - name: Checkout git repo
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Publish nothing until the flamapy packages this one depends on are installable from
+      # PyPI at this version, so the uploads land in dependency order even when every repo is
+      # tagged at once.
+      - name: Wait for the flamapy dependencies on PyPI
+        timeout-minutes: 60
+        run: python .github/workflows/wait_for_pypi.py
+
       - name: Automated Version Bump
         id: changelog
         # A brand-new repo has only the current tag, so changelog-action (which diffs
@@ -39,11 +51,6 @@ jobs:
           body: ${{ steps.changelog.outputs.changes }}
           # Fall back to GitHub's auto-generated notes when the changelog step didn't succeed.
           generate_release_notes: ${{ steps.changelog.outcome != 'success' }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
       - name: Install dependencies
         run: |

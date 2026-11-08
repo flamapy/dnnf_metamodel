@@ -82,3 +82,66 @@ def test_transformation_writes_dimacs():
         header = dimacs.readline()
     assert header.startswith('p cnf ')
     assert model.var_count >= 5  # Root, Base, A, B, C
+
+
+_TSEYTIN_UVL = """features
+    Root {abstract}
+        optional
+            A
+            B
+            C
+            D
+            E
+            F
+constraints
+    (A & B & C) | (D & E & F) | (B & E & F)
+"""
+
+# [1..2] over A, B, C (3 + 3 selections) times D optional: 12 configurations.
+_GROUP_UVL = """features
+    Root {abstract}
+        [1..2]
+            A
+            B
+            C
+        optional
+            D
+"""
+
+
+def test_tseytin_adds_variables_to_the_dimacs():
+    """Without d4: the 'auto'/'tseytin' CNF written for d4 holds the auxiliary variables."""
+    fm = _fm(_TSEYTIN_UVL)
+    plain = FmToDDNNF(fm, cnf_method='distributive').transform()
+    gated = FmToDDNNF(fm, cnf_method='tseytin').transform()
+    assert gated.var_count > plain.var_count == 7  # Root and A-F
+
+
+@requires_d4
+def test_cnf_methods_agree():
+    fm = _fm(_TSEYTIN_UVL)
+    exact = _exact_count(fm)
+    for method in ('distributive', 'tseytin', 'auto'):
+        model = FmToDDNNF(fm, cnf_method=method).transform()
+        assert DDNNFConfigurationsNumber().execute(model).get_result() == exact, method
+
+
+@requires_d4
+def test_group_cardinality():
+    model = FmToDDNNF(_fm(_GROUP_UVL)).transform()
+    assert DDNNFConfigurationsNumber().execute(model).get_result() == 12
+
+
+def test_availability_follows_locate_d4(monkeypatch, tmp_path):
+    import importlib  # noqa: PLC0415
+    import flamapy.metamodels.dnnf_metamodel as plugin  # noqa: PLC0415
+    monkeypatch.setenv('FLAMAPY_D4_PATH', str(tmp_path / 'missing-d4'))
+    monkeypatch.setattr(shutil, 'which', lambda _name: None)
+    assert importlib.reload(plugin).MANIFEST.available is False
+    fake = tmp_path / 'd4'
+    fake.write_text('#!/bin/sh\n')
+    fake.chmod(0o755)
+    monkeypatch.setenv('FLAMAPY_D4_PATH', str(fake))
+    assert importlib.reload(plugin).MANIFEST.available is True
+    monkeypatch.undo()
+    importlib.reload(plugin)

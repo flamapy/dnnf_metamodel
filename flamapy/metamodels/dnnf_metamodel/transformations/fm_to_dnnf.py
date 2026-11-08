@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 
 from flamapy.core.transformations import ModelToModel
-from flamapy.metamodels.fm_metamodel.models import FeatureModel, ClauseSet
+from flamapy.metamodels.fm_metamodel.models import ClauseSet, DEFAULT_CNF_METHOD, FeatureModel
 from flamapy.metamodels.dnnf_metamodel.models import DDNNFModel, locate_d4
 
 
@@ -26,7 +26,7 @@ class FmToDDNNF(ModelToModel):
     def __init__(
         self,
         source_model: FeatureModel,
-        cnf_method: str = 'auto',
+        cnf_method: str = DEFAULT_CNF_METHOD,
         compile: bool = False,
     ) -> None:
         self.source_model = source_model

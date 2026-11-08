@@ -14,9 +14,10 @@ def locate_d4() -> str:
     installed separately.
     """
     candidate = os.environ.get('FLAMAPY_D4_PATH') or shutil.which('d4')
-    if not candidate or not os.path.exists(candidate):
+    if not candidate or not os.path.isfile(candidate) or not os.access(candidate, os.X_OK):
         raise FlamaException(
-            'The d4 compiler was not found. Install d4 (https://github.com/crillab/d4) and '
+            'The d4 compiler was not found (or is not executable). Install d4 '
+            '(https://github.com/crillab/d4) and '
             'expose it as "d4" on PATH or via the FLAMAPY_D4_PATH environment variable.'
         )
     return candidate
